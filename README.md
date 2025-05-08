@@ -21,7 +21,6 @@ A responsive booking dashboard designed for PG (Paying Guest) owners to manage r
 
 ---
 
-
 ## 📦 Tech Stack
 
 - **React.js** (with Hooks and Context API)
@@ -29,4 +28,17 @@ A responsive booking dashboard designed for PG (Paying Guest) owners to manage r
 - **Recharts** (for revenue graph)
 - **LocalStorage** (for temporary data persistence)
 
+---
 
+## 🛠️ How to Run Locally
+
+Follow these steps to get the project running on your local machine:
+
+1. **Clone the repository and install dependencies**:
+
+   Open a terminal, navigate to the folder where you want to clone the project, and run the following commands:
+   
+   ```bash
+   git clone https://github.com/Yadhidya/pg-dashboard.git
+   cd pg-dashboard
+   npm install
