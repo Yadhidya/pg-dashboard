@@ -19,11 +19,6 @@ A responsive booking dashboard designed for PG (Paying Guest) owners to manage r
 - 🔒 **Error Handling** for overbooked rooms or missing details
 - ❌ **Cancel Bookings** feature
 
----
-
-## 📷 Screenshots
-
-> _Include screenshots of the Dashboard page, Bookings page, and Room Setup page if you want to impress more._
 
 ---
 
