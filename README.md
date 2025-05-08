@@ -29,7 +29,4 @@ A responsive booking dashboard designed for PG (Paying Guest) owners to manage r
 - **Recharts** (for revenue graph)
 - **LocalStorage** (for temporary data persistence)
 
----
-
-## 📁 Project Structure
 
