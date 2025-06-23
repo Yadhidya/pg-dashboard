@@ -20,6 +20,11 @@ A responsive booking dashboard designed for PG (Paying Guest) owners to manage r
 - ❌ **Cancel Bookings** feature
 
 ---
+| ![Dashboard](screenshots/dashboard.png) | ![Booking](screenshots/booking.png) |
+|-----------------------------------------|-----------------------------------------------------|
+| ![Revenue](screenshots/revenue.png) | ![Settings](screenshots/settings.png) |
+
+---
 
 ## 📦 Tech Stack
 
