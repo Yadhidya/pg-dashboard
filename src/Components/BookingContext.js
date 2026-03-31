@@ -1,36 +1,90 @@
-import { createContext, useState, useContext, useMemo } from "react";
+import {
+  createContext,
+  useReducer,
+  useContext,
+  useMemo,
+  useEffect,
+} from "react";
 
 const BookingContext = createContext();
 
-export const useBookingContext = () => useContext(BookingContext);
+export const useBookingContext = () => {
+  const context = useContext(BookingContext);
+
+  if (!context) {
+    throw new Error("useBookingContext must be used inside BookingProvider");
+  }
+
+  return context;
+};
+
+/* ---------------- Reducer ---------------- */
+
+const bookingReducer = (state, action) => {
+  switch (action.type) {
+    case "ADD_BOOKING":
+      return [...state, action.payload];
+
+    case "DELETE_BOOKING":
+      return state.filter((booking) => booking.id !== action.payload);
+
+    case "UPDATE_BOOKING":
+      return state.map((booking) =>
+        booking.id === action.payload.id ? action.payload : booking
+      );
+
+    default:
+      return state;
+  }
+};
+
+/* ---------------- Utilities ---------------- */
+
+const normalizeDate = (date) => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+const getBookingRevenue = (booking) =>
+  booking.room.price * booking.numberOfPeople;
+
+/* ---------------- Provider ---------------- */
 
 export const BookingProvider = ({ children }) => {
-  const [bookings, setBookings] = useState([]);
+  const [bookings, dispatch] = useReducer(
+    bookingReducer,
+    [],
+    () => JSON.parse(localStorage.getItem("bookings")) || []
+  );
 
-  // Add booking
+  /* Persist bookings */
+  useEffect(() => {
+    localStorage.setItem("bookings", JSON.stringify(bookings));
+  }, [bookings]);
+
+  /* Actions */
+
   const addBooking = (booking) => {
-    setBookings((prev) => [...prev, booking]);
+    dispatch({ type: "ADD_BOOKING", payload: booking });
   };
 
-  // Utility: calculate booking revenue
-  const getBookingRevenue = (booking) =>
-    booking.room.price * booking.numberOfPeople;
-
-  // Utility: normalize date (remove time)
-  const normalizeDate = (date) => {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    return d;
+  const deleteBooking = (id) => {
+    dispatch({ type: "DELETE_BOOKING", payload: id });
   };
 
-  // Total Revenue
+  const updateBooking = (booking) => {
+    dispatch({ type: "UPDATE_BOOKING", payload: booking });
+  };
+
+  /* ---------------- Revenue Calculations ---------------- */
+
   const totalRevenue = useMemo(() => {
     return bookings.reduce((total, booking) => {
       return total + getBookingRevenue(booking);
     }, 0);
   }, [bookings]);
 
-  // Today's Revenue
   const todayRevenue = useMemo(() => {
     const today = normalizeDate(new Date());
 
@@ -45,9 +99,9 @@ export const BookingProvider = ({ children }) => {
     }, 0);
   }, [bookings]);
 
-  // Weekly Revenue
   const weeklyRevenue = useMemo(() => {
     const today = new Date();
+
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
@@ -67,14 +121,34 @@ export const BookingProvider = ({ children }) => {
     }, 0);
   }, [bookings]);
 
+  const monthlyRevenue = useMemo(() => {
+    const today = new Date();
+
+    return bookings.reduce((total, booking) => {
+      const bookingDate = new Date(booking.bookingDate);
+
+      if (
+        bookingDate.getMonth() === today.getMonth() &&
+        bookingDate.getFullYear() === today.getFullYear()
+      ) {
+        total += getBookingRevenue(booking);
+      }
+
+      return total;
+    }, 0);
+  }, [bookings]);
+
   return (
     <BookingContext.Provider
       value={{
         bookings,
         addBooking,
+        deleteBooking,
+        updateBooking,
         totalRevenue,
         todayRevenue,
         weeklyRevenue,
+        monthlyRevenue,
       }}
     >
       {children}
