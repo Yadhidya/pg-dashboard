@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useMemo } from "react";
 
 const BookingContext = createContext();
 
@@ -7,58 +7,74 @@ export const useBookingContext = () => useContext(BookingContext);
 export const BookingProvider = ({ children }) => {
   const [bookings, setBookings] = useState([]);
 
+  // Add booking
   const addBooking = (booking) => {
-    setBookings((prevBookings) => [...prevBookings, booking]);
+    setBookings((prev) => [...prev, booking]);
   };
 
-  const calculateTotalRevenue = () => {
-    return bookings.reduce(
-      (total, booking) => total + booking.room.price * booking.numberOfPeople,
-      0
-    );
+  // Utility: calculate booking revenue
+  const getBookingRevenue = (booking) =>
+    booking.room.price * booking.numberOfPeople;
+
+  // Utility: normalize date (remove time)
+  const normalizeDate = (date) => {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    return d;
   };
 
-  const getTodayDate = () => {
-    const today = new Date();
-    return new Date(today.setHours(0, 0, 0, 0)); 
-  };
-
-  const calculateTodayRevenue = () => {
-    const today = getTodayDate();
+  // Total Revenue
+  const totalRevenue = useMemo(() => {
     return bookings.reduce((total, booking) => {
-      const bookingDate = new Date(booking.bookingDate); 
-      if (bookingDate >= today) {
-        total += booking.room.price * booking.numberOfPeople;
+      return total + getBookingRevenue(booking);
+    }, 0);
+  }, [bookings]);
+
+  // Today's Revenue
+  const todayRevenue = useMemo(() => {
+    const today = normalizeDate(new Date());
+
+    return bookings.reduce((total, booking) => {
+      const bookingDate = normalizeDate(booking.bookingDate);
+
+      if (bookingDate.getTime() === today.getTime()) {
+        total += getBookingRevenue(booking);
       }
+
       return total;
     }, 0);
-  };
+  }, [bookings]);
 
-  const calculateWeeklyRevenue = () => {
+  // Weekly Revenue
+  const weeklyRevenue = useMemo(() => {
     const today = new Date();
-    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-    startOfWeek.setHours(0, 0, 0, 0); 
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
 
-    const endOfWeek = new Date(today.setDate(today.getDate() + (6 - today.getDay())));
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
     endOfWeek.setHours(23, 59, 59, 999);
 
     return bookings.reduce((total, booking) => {
-      const bookingDate = new Date(booking.bookingDate); 
+      const bookingDate = new Date(booking.bookingDate);
+
       if (bookingDate >= startOfWeek && bookingDate <= endOfWeek) {
-        total += booking.room.price * booking.numberOfPeople;
+        total += getBookingRevenue(booking);
       }
+
       return total;
     }, 0);
-  };
+  }, [bookings]);
 
   return (
     <BookingContext.Provider
       value={{
         bookings,
         addBooking,
-        calculateTotalRevenue,
-        calculateTodayRevenue,
-        calculateWeeklyRevenue,
+        totalRevenue,
+        todayRevenue,
+        weeklyRevenue,
       }}
     >
       {children}
