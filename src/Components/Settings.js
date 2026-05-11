@@ -1,9 +1,22 @@
 import React, { useState } from "react";
+import {
+  Building2,
+  BedDouble,
+  Plus,
+  Trash2,
+  Pencil,
+  IndianRupee,
+  Users,
+  Layers3,
+} from "lucide-react";
+
 import { useRoomContext } from "./RoomContext";
 
 const Settings = () => {
   const { floors, setFloors, rooms, setRooms } = useRoomContext();
+
   const [newFloor, setNewFloor] = useState("");
+
   const [newRoom, setNewRoom] = useState({
     name: "",
     floor: floors.length ? floors[0].number : 1,
@@ -11,8 +24,8 @@ const Settings = () => {
     price: "",
     capacity: 1,
   });
+
   const [editingRoomIndex, setEditingRoomIndex] = useState(null);
-  const [editingFloorIndex, setEditingFloorIndex] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
 
   const roomTypeCapacity = {
@@ -24,6 +37,7 @@ const Settings = () => {
 
   const handleRoomChange = (e) => {
     const { name, value } = e.target;
+
     if (name === "type" && value !== "custom") {
       setNewRoom((prev) => ({
         ...prev,
@@ -33,36 +47,21 @@ const Settings = () => {
     } else {
       setNewRoom((prev) => ({
         ...prev,
-        [name]: name === "price" || name === "capacity" || name === "floor" ? parseInt(value) : value,
+        [name]:
+          name === "price" ||
+          name === "capacity" ||
+          name === "floor"
+            ? parseInt(value)
+            : value,
       }));
     }
   };
 
   const isRoomNameDuplicate = (name) => {
-    return rooms.some((room) => room.name.toLowerCase() === name.toLowerCase());
-  };
-
-  const addRoom = () => {
-    if (!newRoom.name || !newRoom.price || !newRoom.capacity) {
-      setErrorMessage("All fields must be filled out.");
-      return;
-    }
-
-    if (isRoomNameDuplicate(newRoom.name)) {
-      setErrorMessage("Room name already exists. Please choose a different name.");
-      return;
-    }
-
-    if (editingRoomIndex !== null) {
-      const updated = [...rooms];
-      updated[editingRoomIndex] = newRoom;
-      setRooms(updated);
-      setEditingRoomIndex(null);
-    } else {
-      setRooms([...rooms, newRoom]);
-    }
-
-    resetRoomForm();
+    return rooms.some(
+      (room) =>
+        room.name.toLowerCase() === name.toLowerCase()
+    );
   };
 
   const resetRoomForm = () => {
@@ -73,22 +72,56 @@ const Settings = () => {
       price: "",
       capacity: 1,
     });
-    setErrorMessage(""); 
+
+    setEditingRoomIndex(null);
+    setErrorMessage("");
+  };
+
+  const addRoom = () => {
+    if (
+      !newRoom.name ||
+      !newRoom.price ||
+      !newRoom.capacity
+    ) {
+      setErrorMessage("Fill all required fields");
+      return;
+    }
+
+    if (
+      isRoomNameDuplicate(newRoom.name) &&
+      editingRoomIndex === null
+    ) {
+      setErrorMessage("Room name already exists");
+      return;
+    }
+
+    if (editingRoomIndex !== null) {
+      const updated = [...rooms];
+      updated[editingRoomIndex] = newRoom;
+      setRooms(updated);
+    } else {
+      setRooms([...rooms, newRoom]);
+    }
+
+    resetRoomForm();
   };
 
   const addFloor = () => {
     const floorNumber = parseInt(newFloor);
-    if (!floorNumber || floors.find((f) => f.number === floorNumber)) return;
 
-    const updated = [...floors];
-    if (editingFloorIndex !== null) {
-      updated[editingFloorIndex] = { number: floorNumber };
-      setEditingFloorIndex(null);
-    } else {
-      updated.push({ number: floorNumber });
-    }
+    if (
+      !floorNumber ||
+      floors.find((f) => f.number === floorNumber)
+    )
+      return;
 
-    setFloors(updated.sort((a, b) => a.number - b.number));
+    setFloors([
+      ...floors,
+      {
+        number: floorNumber,
+      },
+    ]);
+
     setNewFloor("");
   };
 
@@ -104,153 +137,295 @@ const Settings = () => {
   };
 
   const deleteFloor = (floorNumber) => {
-    setFloors((prev) => prev.filter((f) => f.number !== floorNumber));
-    setRooms((prev) => prev.filter((room) => room.floor !== floorNumber));
+    setFloors((prev) =>
+      prev.filter((f) => f.number !== floorNumber)
+    );
+
+    setRooms((prev) =>
+      prev.filter((room) => room.floor !== floorNumber)
+    );
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6 text-gray-800">Room & Floor Setup</h2>
+    <div className="min-h-screen bg-slate-950 text-white p-6 md:p-10">
+      
+      {/* Header */}
+      <div className="mb-10">
+        <h1 className="text-4xl font-bold flex items-center gap-3">
+          <Building2 className="text-cyan-400" size={36} />
+          Hotel Settings
+        </h1>
 
-      {/* Floor Management */}
-      <div className="mb-6 bg-white shadow rounded p-5">
-        <h3 className="text-xl font-semibold mb-4 text-gray-700">Manage Floors</h3>
-        <div className="flex gap-4 items-center">
-          <input
-            type="number"
-            value={newFloor}
-            onChange={(e) => setNewFloor(e.target.value)}
-            placeholder="Enter floor number"
-            className="p-3 border rounded-md w-1/2"
-          />
+        <p className="text-slate-400 mt-2">
+          Manage floors and rooms with modern controls
+        </p>
+      </div>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Floors */}
+        <div className="bg-slate-900 border border-white/10 rounded-3xl p-6 shadow-xl">
+          <div className="flex items-center gap-2 mb-5">
+            <Layers3 className="text-cyan-400" />
+            <h2 className="text-xl font-semibold">
+              Floors
+            </h2>
+          </div>
+
+          <div className="flex gap-3">
+            <input
+              type="number"
+              value={newFloor}
+              onChange={(e) =>
+                setNewFloor(e.target.value)
+              }
+              placeholder="Floor Number"
+              className="flex-1 rounded-xl border border-white/10 bg-slate-800 px-4 py-3 text-white outline-none focus:ring-2 focus:ring-cyan-500"
+            />
+
+            <button
+              onClick={addFloor}
+              className="rounded-xl bg-cyan-500 px-4 hover:bg-cyan-400 transition"
+            >
+              <Plus size={22} />
+            </button>
+          </div>
+
+          <div className="mt-6 space-y-3">
+            {floors.map((floor) => (
+              <div
+                key={floor.number}
+                className="flex items-center justify-between rounded-2xl bg-slate-800 px-4 py-3"
+              >
+                <span className="font-medium">
+                  Floor {floor.number}
+                </span>
+
+                <button
+                  onClick={() =>
+                    deleteFloor(floor.number)
+                  }
+                  className="text-red-400 hover:text-red-300"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Room Form */}
+        <div className="lg:col-span-2 bg-slate-900 border border-white/10 rounded-3xl p-6 shadow-xl">
+          
+          <div className="flex items-center gap-2 mb-6">
+            <BedDouble className="text-cyan-400" />
+            <h2 className="text-xl font-semibold">
+              {editingRoomIndex !== null
+                ? "Edit Room"
+                : "Add Room"}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            
+            <input
+              type="text"
+              name="name"
+              value={newRoom.name}
+              onChange={handleRoomChange}
+              placeholder="Room Name"
+              className="rounded-xl border border-white/10 bg-slate-800 px-4 py-3 outline-none focus:ring-2 focus:ring-cyan-500"
+            />
+
+            <select
+              name="floor"
+              value={newRoom.floor}
+              onChange={handleRoomChange}
+              className="rounded-xl border border-white/10 bg-slate-800 px-4 py-3 outline-none focus:ring-2 focus:ring-cyan-500"
+            >
+              {floors.map((f) => (
+                <option
+                  key={f.number}
+                  value={f.number}
+                >
+                  Floor {f.number}
+                </option>
+              ))}
+            </select>
+
+            <select
+              name="type"
+              value={newRoom.type}
+              onChange={handleRoomChange}
+              className="rounded-xl border border-white/10 bg-slate-800 px-4 py-3 outline-none focus:ring-2 focus:ring-cyan-500"
+            >
+              <option value="single">
+                Single
+              </option>
+              <option value="double">
+                Double
+              </option>
+              <option value="triple">
+                Triple
+              </option>
+              <option value="custom">
+                Custom
+              </option>
+            </select>
+
+            <div className="relative">
+              <IndianRupee
+                className="absolute left-4 top-3.5 text-slate-400"
+                size={18}
+              />
+
+              <input
+                type="number"
+                name="price"
+                value={newRoom.price}
+                onChange={handleRoomChange}
+                placeholder="Room Price"
+                className="w-full rounded-xl border border-white/10 bg-slate-800 pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+            </div>
+
+            {newRoom.type === "custom" && (
+              <div className="relative">
+                <Users
+                  className="absolute left-4 top-3.5 text-slate-400"
+                  size={18}
+                />
+
+                <input
+                  type="number"
+                  name="capacity"
+                  value={newRoom.capacity}
+                  onChange={handleRoomChange}
+                  placeholder="Capacity"
+                  className="w-full rounded-xl border border-white/10 bg-slate-800 pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-cyan-500"
+                />
+              </div>
+            )}
+          </div>
+
+          {errorMessage && (
+            <div className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              {errorMessage}
+            </div>
+          )}
+
           <button
-            onClick={addFloor}
-            className="bg-green-600 text-white px-5 py-3 rounded hover:bg-green-700"
+            onClick={addRoom}
+            className="mt-6 flex items-center gap-2 rounded-xl bg-cyan-500 px-6 py-3 font-medium text-slate-900 hover:bg-cyan-400 transition"
           >
-            Add Floor
+            <Plus size={18} />
+
+            {editingRoomIndex !== null
+              ? "Update Room"
+              : "Add Room"}
           </button>
         </div>
       </div>
 
-      {/* Room Management */}
-      <div className="mb-6 bg-white shadow rounded p-5">
-        <h3 className="text-xl font-semibold mb-4 text-gray-700">Add / Edit Room</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="name"
-            value={newRoom.name}
-            onChange={handleRoomChange}
-            placeholder="Room Name"
-            className="p-3 border rounded-md"
-          />
-          <select
-            name="floor"
-            value={newRoom.floor}
-            onChange={handleRoomChange}
-            className="p-3 border rounded-md"
-          >
-            {floors.map((f) => (
-              <option key={f.number} value={f.number}>
-                Floor {f.number}
-              </option>
-            ))}
-          </select>
-          <select
-            name="type"
-            value={newRoom.type}
-            onChange={handleRoomChange}
-            className="p-3 border rounded-md"
-          >
-            <option value="single">Single</option>
-            <option value="double">Double</option>
-            <option value="triple">Triple</option>
-            <option value="custom">Custom</option>
-          </select>
-          <input
-            type="number"
-            name="price"
-            value={newRoom.price}
-            onChange={handleRoomChange}
-            placeholder="Price"
-            className="p-3 border rounded-md"
-          />
-          {newRoom.type === "custom" && (
-            <input
-              type="number"
-              name="capacity"
-              value={newRoom.capacity}
-              onChange={handleRoomChange}
-              placeholder="Capacity"
-              className="p-3 border rounded-md"
-            />
-          )}
-        </div>
-        {errorMessage && <p className="text-red-600 mt-2">{errorMessage}</p>}
-        <button
-          onClick={addRoom}
-          className="mt-4 bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700"
-        >
-          {editingRoomIndex !== null ? "Update Room" : "Add Room"}
-        </button>
-      </div>
-
-      {/* Floor-wise Room Display */}
-      <div className="space-y-6">
+      {/* Room List */}
+      <div className="mt-10 space-y-6">
         {floors.map((floor) => {
-          const floorRooms = rooms.filter((room) => room.floor === floor.number);
+          const floorRooms = rooms.filter(
+            (room) => room.floor === floor.number
+          );
+
           return (
-            <div key={floor.number} className="bg-gray-100 p-5 rounded shadow-sm">
-              <div className="flex justify-between items-center mb-4">
-                <h4 className="text-lg font-bold text-gray-800">Floor {floor.number}</h4>
-                <div className="space-x-3">
-                  <button
-                    onClick={() => deleteFloor(floor.number)}
-                    className="text-red-600 hover:underline"
-                  >
-                    Delete Floor
-                  </button>
-                </div>
+            <div
+              key={floor.number}
+              className="rounded-3xl border border-white/10 bg-slate-900 p-6 shadow-xl"
+            >
+              
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-semibold">
+                  Floor {floor.number}
+                </h3>
+
+                <span className="rounded-full bg-cyan-500/20 px-4 py-1 text-sm text-cyan-300">
+                  {floorRooms.length} Rooms
+                </span>
               </div>
+
               {floorRooms.length > 0 ? (
-                <table className="w-full table-auto text-left bg-white rounded">
-                  <thead className="bg-gray-200">
-                    <tr>
-                      <th className="px-4 py-2">Room</th>
-                      <th className="px-4 py-2">Type</th>
-                      <th className="px-4 py-2">Price</th>
-                      <th className="px-4 py-2">Capacity</th>
-                      <th className="px-4 py-2">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {floorRooms.map((room, index) => (
-                      <tr key={room.name}>
-                        <td className="px-4 py-2">{room.name}</td>
-                        <td className="px-4 py-2">{room.type}</td>
-                        <td className="px-4 py-2">${room.price}</td>
-                        <td className="px-4 py-2">{room.capacity}</td>
-                        <td className="px-4 py-2">
-                          <button
-                            onClick={() => editRoom(index)}
-                            className="text-blue-600 hover:underline"
-                          >
-                            Edit
-                          </button>{" "}
-                          |{" "}
-                          <button
-                            onClick={() => deleteRoom(index)}
-                            className="text-red-600 hover:underline"
-                          >
-                            Delete
-                          </button>
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-white/10 text-slate-400">
+                        <th className="py-4 text-left">
+                          Room
+                        </th>
+                        <th className="py-4 text-left">
+                          Type
+                        </th>
+                        <th className="py-4 text-left">
+                          Price
+                        </th>
+                        <th className="py-4 text-left">
+                          Capacity
+                        </th>
+                        <th className="py-4 text-left">
+                          Actions
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+
+                    <tbody>
+                      {floorRooms.map((room, index) => (
+                        <tr
+                          key={room.name}
+                          className="border-b border-white/5 hover:bg-white/5 transition"
+                        >
+                          <td className="py-4">
+                            {room.name}
+                          </td>
+
+                          <td className="py-4 capitalize">
+                            {room.type}
+                          </td>
+
+                          <td className="py-4">
+                            ₹{room.price}
+                          </td>
+
+                          <td className="py-4">
+                            {room.capacity}
+                          </td>
+
+                          <td className="py-4">
+                            <div className="flex gap-3">
+                              <button
+                                onClick={() =>
+                                  editRoom(index)
+                                }
+                                className="rounded-lg bg-blue-500/20 p-2 text-blue-300 hover:bg-blue-500/30"
+                              >
+                                <Pencil size={16} />
+                              </button>
+
+                              <button
+                                onClick={() =>
+                                  deleteRoom(index)
+                                }
+                                className="rounded-lg bg-red-500/20 p-2 text-red-300 hover:bg-red-500/30"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
-                <p>No rooms available on this floor</p>
+                <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-slate-500">
+                  No rooms available on this floor
+                </div>
               )}
             </div>
           );
